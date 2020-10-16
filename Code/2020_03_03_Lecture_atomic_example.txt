@@ -1,0 +1,33 @@
+#include <iostream>
+#include <atomic>
+#include <vector>
+#include <thread>
+
+using namespace std;
+//long sum{ 0 };
+
+void Increment(int i, atomic<int>& I) {
+	for (int j = 0; j < i; ++j) I +=5;
+}
+
+int main() {
+	//int I{ 0 };
+	atomic<int> I(0);
+	Increment(1000000, I);
+	cout << I.load() << endl;
+	thread t1(Increment, 200000, ref(I));
+	thread t2(Increment, 200000, ref(I));
+	thread t3(Increment, 200000, ref(I));
+	thread t4(Increment, 200000, ref(I));
+	thread t5(Increment, 200000, ref(I));
+
+	t1.join();
+	t2.join();
+	t3.join();
+	t4.join();
+	t5.join();
+
+	cout << I.load() << endl;
+	return 0;
+}
+	

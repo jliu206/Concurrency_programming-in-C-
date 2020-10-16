@@ -1,0 +1,90 @@
+#include <iostream>
+#include <thread>
+#include <list>
+#include <functional>//to use keyword function 
+#include <ratio>
+#include <chrono>
+
+using namespace std;
+
+bool f1(int a, int b) { return a > b; }
+
+class MyComparator {
+public:
+	bool operator()(int a, int b) { return a % 2 > b % 2; }
+
+} f3;
+
+int max(int a, int b, function<bool(int, int)> F){
+	//int max(int a, int b, bool (* F)(int a, int b)){//won't alwayts work for functor and lambda
+	return F(a, b) ? a : b;
+
+}
+
+template <class T>  T Square(T a) { return a * a; }
+
+template <typename T> int min(int a, int b, T func) {
+
+	return func(a, b) ? b : a;
+}
+
+
+int main() {
+	list<int> L1{ 4,7,2,5, 1 };
+	for (auto i : L1) { cout << i << " "; }
+	cout << endl;
+	L1.sort();
+	for (auto i : L1) { cout << i << " "; }
+	cout << endl;
+	list<int> L2{ 4,7,2,5, 1 };
+	L2.sort(f1);
+	for (auto i : L2) { cout << i << " "; }
+	cout << endl;
+	MyComparator f2;//f2 is a functor
+	cout << f2(100, 201) << endl;//functo
+	list<int> L3 { 4,7,2,5, 1 }; 
+	L3.sort(f2);
+	for (auto i : L3) { cout << i << " "; }
+	cout << endl;
+	list<int> L4{ 4,7,2,5, 6 };
+	L4.sort([](int a, int b) {return a % 3 > b % 3; });
+	for (auto i : L4) { cout << i << " "; }
+	cout << endl;
+	list<int> L5{ 4,7,2,5, 1};
+	L5.sort(MyComparator()); //Anonymous functor -- functor without a name
+	for (auto i : L5) { cout << i << " "; }
+	cout << endl;
+
+	bool (*F)(int a, int b);
+	F = f1;
+	list<int> L6{ 4,7,2,5, 1 };
+	L6.sort(F);
+	for (auto i : L6) { cout << i << " "; }	cout << endl;
+	
+	cout << max(100, 200, f1) << endl;
+	cout << max(100, 201, f2) << endl;
+	cout << max(100, 201, [](int a, int b) {return a % 3 > b % 3; }) << endl;
+
+
+	cout << Square(5) << " " << Square(3.5) << endl;
+
+	cout << min(100, 200, f1) << endl;
+	cout << min(100, 201, f2) << endl;
+	cout << min(100, 201, [](int a, int b) {return a % 3 > b % 3; }) << endl;
+
+
+	ratio<3, 5> ThreeFifth;
+	cout << ThreeFifth.num << " " << ThreeFifth.den << endl;
+
+	thread t1(f1, 1000, 2000);
+	thread t2(f2, 1000, 2000);
+	thread t3([](int a, int b) {return a % 3 > b % 3; }, 1000, 2000);
+	this_thread::sleep_for(chrono::milliseconds(100));
+	if (t1.joinable) t1.join();
+	t2.join();
+	t3.join();
+
+
+
+	return 0;
+}

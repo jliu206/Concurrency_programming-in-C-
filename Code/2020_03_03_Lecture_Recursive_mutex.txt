@@ -1,0 +1,35 @@
+#include <iostream>
+#include <thread>
+#include <mutex>
+
+    std::recursive_mutex mutex;
+    int i=100;
+
+
+
+    void mul(int x) {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        i *= x;
+    }
+
+    void di(int x) {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        i /= x;
+    }
+
+    void both(int x, int y) {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        mul(x);
+        di(y);
+    }
+
+
+    void main() {
+        std::thread t1(mul, 10);
+        std::thread t2(di, 2);
+        std::thread t3(both, 10, 5);
+        t1.join();
+        t2.join();
+        t3.join();
+        std::cout << i << std::endl;
+    }

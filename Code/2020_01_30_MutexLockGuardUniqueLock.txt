@@ -1,0 +1,56 @@
+//mutex, lock_guard, unique_lock, condition_varaible, wait, notify_all, notify_one
+//synchronization
+#include <iostream>
+#include <thread>
+#include <string>
+#include <mutex>//mutually exclusive: lock
+
+using namespace std;
+mutex lock1;
+void f1() {
+	string s = "111111" ;
+	for (int i = 0; i < 1000; i++) { 
+		//lock1.lock();
+		//if it is currently "locked", the thread will 
+		//continue to wait and check if it becomes "unlocked".
+		//If it is currently "unlocked", the thread will lock it and proceed to the next 
+		//line of statement
+		
+			//lock_guard<mutex>  lock2(lock1);//Behaves like a mutex lock;
+			//Will unlock itself when going out of scope
+			//Does not support lock() or unlock()
+
+
+			unique_lock<mutex> lock3(lock1);
+			//Behaves like a lock_guard;
+			//Will unlock itself when going out of scope
+			//Supports lock() and unlock()
+
+			cout << "Printting f1" << s << endl;
+		
+		//lock1.unlock();
+		lock3.unlock();
+		//lock3.unlock(); //will cause error if unlocked again
+
+		
+	}
+	
+}
+void f2() {
+	string s = "000000";
+	for (int i = 0; i < 1000; i++) {
+		lock1.lock();
+		cout << "Printting f2" << s << endl; 
+		lock1.unlock();
+	}
+
+}
+
+int main() {
+	thread t1(f1);
+	thread t2(f2);
+	t1.join();
+	t2.join();
+	return 0;
+
+}
