@@ -1,0 +1,78 @@
+#include <iostream>
+#include <fstream>
+#include <thread>
+#include <vector>
+using namespace std;
+
+
+void Update(vector<vector<int>>& Distance, vector<vector<int>>& Path, int k, int row1, int row2, int col1, int col2) {
+	for (int i = row1; i <= row2; ++i) {
+		for (int j = col1; j <= col2; ++j) {
+			if (Distance[i][j] > Distance[i][k] + Distance[k][j]) {
+				Distance[i][j] = Distance[i][k] + Distance[k][j];
+				Path[i][j] = Path[i][k];
+			}
+
+		}
+	}
+}
+
+int main() {
+	int Size;
+	int Edges;
+	ifstream in("graph.txt");
+//The first line is number of nodes
+//The second line is number of edges
+//after that each line node a to node b with a weidht w
+	in >> Size >> Edges;
+	cout << Size << " " << Edges << endl;
+	//vector<vector<int>> Distance(Size);
+	vector<vector<int>> Distance(Size, vector<int>(Size));
+	for (auto& i : Distance) {
+		for (auto& j : i) { j = 99999; }
+	}
+	for (int i = 0; i < Size; ++i) { Distance[i][i] = 0; }
+	vector<vector<int>> Path(Size, vector<int>(Size));
+	for (auto& i : Path) {
+		for (auto& j : i) { j = -1; }
+	}
+	for (int i = 0; i < Size; ++i) { Path[i][i] = i; }
+
+	for (int i = 0; i < Edges; ++i) {
+		int a, b, c;
+		in >> a >> b >> c;
+		if (c < Distance[a][b]) {
+			Distance[a][b] = c;
+			Path[a][b] = b;
+		}
+	}
+	in.close();
+	for (int k = 0; k < Size; ++k) {
+		thread t1(Update, ref(Distance), ref(Path), k, 0, Size / 4-1, 0, Size - 1);
+		thread t2(Update, ref(Distance), ref(Path), k, Size / 4, Size/2-1, 0, Size - 1);
+		thread t3(Update, ref(Distance), ref(Path), k, Size/2, Size *3/4-1, 0, Size - 1);
+		Update (Distance, Path, k, Size *3/4, Size - 1, 0, Size - 1);
+		t1.join();
+		t2.join();
+		t3.join();
+	}
+	ofstream out("result.txt");
+
+	out << "Distance = " << endl;
+	for (int i = 0; i < Size; ++i) {
+		for (int j = 0; j < Size; ++j) {
+			out << Distance[i][j] << " ";
+		}
+		out << endl;
+	}
+	out << "Path = " << endl;
+	for (int i = 0; i < Size; ++i) {
+		for (int j = 0; j < Size; ++j) {
+			out << Path[i][j] << " ";
+		}
+		out << endl;
+	}
+
+	out.close();
+	return 0;
+}

@@ -1,0 +1,33 @@
+#include <iostream>
+#include <mutex>
+//#include <condition_variable>
+
+using namespace std;
+
+mutex m1, m2;
+
+void f1(unique_lock<mutex>& ul) {
+
+	ul = unique_lock<mutex>(m1);//operator = is a move assignment
+	cout << "one" << endl;
+	ul = unique_lock<mutex>(m2);
+	cout << "two" << endl;
+	ul = unique_lock<mutex>(m1);
+	cout << "three" << endl;
+
+}
+
+void f2() {
+	unique_lock<mutex> ul;
+	f1(ul);
+
+
+}
+
+
+int main() {
+	thread t1(f2);
+	t1.join();
+
+	return 0;
+}
